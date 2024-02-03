@@ -19,6 +19,7 @@ import { QuestionSchema } from "@/lib/validation";
 import { Editor } from "@tinymce/tinymce-react";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
+import { createQuestion } from "@/lib/actions/question.action";
 
 const type: any = "create";
 
@@ -36,17 +37,18 @@ const Question = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof QuestionSchema>) {
+  const handleSubmit = async (values: z.infer<typeof QuestionSchema>) => {
     setIsSubmitting(true);
 
     try {
       console.log(values);
+      await createQuestion(values);
     } catch (error) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   const handleInputKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -85,7 +87,7 @@ const Question = () => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="flex w-full flex-col gap-10"
       >
         <FormField
@@ -127,6 +129,10 @@ const Question = () => {
                   apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
                   onInit={(evt, editor) => (editorRef.current = editor)}
                   initialValue=""
+                  onBlur={field.onBlur}
+                  onEditorChange={(content) => {
+                    field.onChange(content);
+                  }}
                   init={{
                     height: 350,
                     menubar: false,
