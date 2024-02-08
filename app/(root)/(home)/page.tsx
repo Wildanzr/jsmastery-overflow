@@ -5,42 +5,11 @@ import NoResult from "@/components/shared/NoResult";
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
+import { getQuestions } from "@/lib/actions/question.action";
 import Link from "next/link";
 
-export default function HomePage() {
-  const questions = [
-    {
-      _id: "1",
-      title: "How to use React Query?",
-      tags: [
-        { _id: "1", name: "React" },
-        { _id: "2", name: "React Query" },
-      ],
-      author: {
-        _id: "1",
-        name: "John Doe",
-        picture: "/assets/icons/avatar.svg", // replace with actual URL or data
-      },
-      upvotes: 34928,
-      views: 7182332,
-      answers: [{}], // replace with actual data
-      createdAt: new Date("2024-02-02T12:12:12.000Z"),
-    },
-    {
-      _id: "2",
-      title: "How to center a div?",
-      tags: [{ _id: "1", name: "CSS" }],
-      author: {
-        _id: "1",
-        name: "John Doe",
-        picture: "/assets/icons/avatar.svg", // replace with actual URL or data
-      },
-      upvotes: 10,
-      views: 100,
-      answers: [{}], // replace with actual data
-      createdAt: new Date("2021-08-01T12:12:12.000Z"),
-    },
-  ];
+export default async function HomePage() {
+  const result = await getQuestions({});
   return (
     <>
       <div
@@ -73,8 +42,8 @@ export default function HomePage() {
 
       <HomeFilter />
       <div className="mt-10 flex w-full flex-col gap-6">
-        {questions.length > 0 ? (
-          questions.map((question) => (
+        {result.questions.length > 0 ? (
+          result.questions.map((question) => (
             <QuestionCard
               key={question._id}
               _id={question._id}
