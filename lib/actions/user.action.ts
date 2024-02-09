@@ -40,7 +40,7 @@ export const updateUser = async (payload: UpdateUserParams) => {
 
     const { clerkId, updateData, path } = payload;
 
-    await User.findByIdAndUpdate({ clerkId }, updateData, { new: true });
+    await User.findOneAndUpdate({ clerkId }, updateData, { new: true });
     revalidatePath(path);
   } catch (error) {
     console.error(error);
