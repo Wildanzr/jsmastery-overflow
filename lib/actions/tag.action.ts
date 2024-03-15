@@ -2,8 +2,21 @@
 
 import User from "@/database/user.model";
 import { connectToDatabase } from "../mongoose";
-import { GetTopInteractedTagsParams } from "./shared.types";
-// import Tag from "@/database/tag.model";
+import { GetAllTagsParams, GetTopInteractedTagsParams } from "./shared.types";
+import Tag from "@/database/tag.model";
+
+export const getAllTags = async (payload: GetAllTagsParams) => {
+  try {
+    connectToDatabase();
+
+    const tags = await Tag.find({});
+
+    return { tags };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 export const getTopInteractedTags = async (
   payload: GetTopInteractedTagsParams
