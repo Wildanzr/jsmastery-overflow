@@ -5,6 +5,7 @@ import {
   downvoteQuestion,
   upvoteQuestion,
 } from "@/lib/actions/question.action";
+import { saveQuestion } from "@/lib/actions/user.action";
 import { formatAndDivideNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -79,7 +80,13 @@ const Votes = ({
     }
   };
 
-  const handleSave = async () => {};
+  const handleSave = async () => {
+    await saveQuestion({
+      questionId: JSON.parse(itemId),
+      userId: JSON.parse(userId),
+      path: pathname,
+    });
+  };
   return (
     <div className="flex gap-5 ">
       <div className="flex-center gap-2.5">

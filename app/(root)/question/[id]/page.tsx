@@ -49,7 +49,7 @@ const QuestionDetailPage = async ({ params, searchParams }: any) => {
               downvotes={question.downvotes.length}
               hasUpvoted={question.upvotes.includes(mongoUser._id)}
               hasDownvoted={question.downvotes.includes(mongoUser._id)}
-              // hasSaved={question.saved.includes(question._id)}
+              hasSaved={mongoUser.saved.includes(question._id)}
             />
           </div>
         </div>
