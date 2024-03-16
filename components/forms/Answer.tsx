@@ -10,9 +10,18 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useTheme } from '@/contexts/ThemeProvider';
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { createAnswer } from '@/lib/actions/answer.action';
+import { usePathname } from 'next/navigation';
+
+interface AnswerProps {
+  question: string;
+  questionId: string;
+  authorId: string;
+}
 
 
-const Answer = () => {
+const Answer = ({ authorId, question, questionId }: AnswerProps) => {
+  const pathname = usePathname();
   const { mode } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false)
   const editorRef = useRef<any>(null);
@@ -23,10 +32,28 @@ const Answer = () => {
     },
   })
 
-  const handleCreateAnswer = async () => {
+  const handleCreateAnswer = async (values: z.infer<typeof AnswerSchema>) => {
     setIsSubmitting(true)
-    console.log(form.getValues())
-    setIsSubmitting(false)
+
+    try {
+      await createAnswer({
+        content: values.answer,
+        author: JSON.parse(authorId),
+        question: JSON.parse(questionId),
+        path: pathname
+      })
+
+      form.reset();
+      if (editorRef.current) {
+        const editor = editorRef.current;
+        editor.setContent('');
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleGenerateAIAnswer = async () => {}

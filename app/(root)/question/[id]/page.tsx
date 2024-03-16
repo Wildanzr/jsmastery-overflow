@@ -7,9 +7,20 @@ import { formatAndDivideNumber, getTimestamp } from '@/lib/utils'
 import ParseHTML from '@/components/shared/ParseHTML'
 import RenderTag from '@/components/shared/RenderTag'
 import Answer from '@/components/forms/Answer'
+import { auth } from '@clerk/nextjs'
+import { getUserById } from '@/lib/actions/user.action'
+import AllAnswer from '@/components/shared/AllAnswer'
+import Votes from '@/components/shared/Votes'
 
 const QuestionDetailPage = async ({ params, searchParams}: any) => {
   const { question} = await getQuestionById({ questionId: params.id })
+  const { userId } = auth();
+  let mongoUser;
+
+  if (userId) {
+    mongoUser = await getUserById({ userId });
+  }
+
   return (
     <>
       <div className="flex-start w-full flex-col">
@@ -22,7 +33,7 @@ const QuestionDetailPage = async ({ params, searchParams}: any) => {
           </Link>
 
           <div className="flex justify-end">
-            VOTING
+            <Votes />
           </div>
         </div>
 
@@ -67,7 +78,17 @@ const QuestionDetailPage = async ({ params, searchParams}: any) => {
         ))}
       </div>
 
-      <Answer />
+      <AllAnswer 
+        questionId={JSON.stringify(question._id)}
+        userId={JSON.stringify(mongoUser._id)}
+        totalAnswers={question.answers.length}
+      />
+
+      <Answer 
+        question={question.content}
+        questionId={JSON.stringify(question._id)}
+        authorId={JSON.stringify(mongoUser._id)}
+      />
     </>
   )
 }
