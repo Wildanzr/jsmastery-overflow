@@ -33,7 +33,16 @@ const QuestionDetailPage = async ({ params, searchParams}: any) => {
           </Link>
 
           <div className="flex justify-end">
-            <Votes />
+            <Votes 
+              types="question"
+              itemId={JSON.stringify(question._id)}
+              userId={JSON.stringify(mongoUser._id)}
+              upvotes={question.upvotes.length}
+              downvotes={question.downvotes.length}
+              hasUpvoted={question.upvotes.includes(mongoUser._id)}
+              hasDownvoted={question.downvotes.includes(mongoUser._id)}
+              // hasSaved={question.saved.includes(question._id)}
+            />
           </div>
         </div>
 

@@ -1,8 +1,115 @@
+'use client'
+
+import { downvoteQuestion, upvoteQuestion } from '@/lib/actions/question.action';
+import { formatAndDivideNumber } from '@/lib/utils';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import React from 'react'
 
-const Votes = () => {
+interface VotesProps {
+  types: 'question' | 'answer';
+  itemId: string;
+  userId: string;
+  upvotes: number;
+  downvotes: number;
+  hasUpvoted: boolean;
+  hasDownvoted: boolean;
+  hasSaved?: boolean;
+}
+
+const Votes = ({ types, itemId, userId, upvotes, downvotes, hasUpvoted, hasDownvoted, hasSaved}: VotesProps) => {
+  const pathname = usePathname();
+
+  const handleUpvote = async () => {
+    if (!userId) return;
+
+    if (types === 'question') {
+      await upvoteQuestion({
+        questionId: JSON.parse(itemId),
+        userId: JSON.parse(userId),
+        hasdownVoted: hasDownvoted,
+        hasupVoted: hasUpvoted,
+        path: pathname
+      })
+    } else if (types === 'answer') {
+      // 
+    }
+
+    // TODO: show toast
+  }
+
+  const handleDownvote = async () => {
+    if (!userId) return;
+
+    if (types === 'question') {
+      await downvoteQuestion({
+        questionId: JSON.parse(itemId),
+        userId: JSON.parse(userId),
+        hasdownVoted: hasDownvoted,
+        hasupVoted: hasUpvoted,
+        path: pathname
+      })
+    } else if (types === 'answer') {
+      // 
+    }
+  }
+
+  const handleSave = async () => {}
   return (
-    <div>Votes</div>
+   <div className="flex gap-5 ">
+    <div className="flex-center gap-2.5">
+      <div className="flex-center gap-1.5">
+        <Image 
+          src={hasUpvoted 
+            ? "/assets/icons/upvoted.svg"
+            : "/assets/icons/upvote.svg"
+          }
+          width={18}
+          height={18}
+          alt="upvote"
+          className='cursor-pointer'
+          onClick={handleUpvote}
+        />
+        <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
+          <p className='subtle-medium text-dark400_light900'>
+            {formatAndDivideNumber(upvotes)}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div className="flex-center gap-2.5">
+      <div className="flex-center gap-1.5">
+        <Image 
+          src={hasDownvoted 
+            ? "/assets/icons/downvoted.svg"
+            : "/assets/icons/downvote.svg"
+          }
+          width={18}
+          height={18}
+          alt="downvote"
+          className='cursor-pointer'
+          onClick={handleDownvote}
+        />
+        <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
+          <p className='subtle-medium text-dark400_light900'>
+            {formatAndDivideNumber(downvotes)}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <Image 
+          src={hasSaved 
+            ? "/assets/icons/star-filled.svg"
+            : "/assets/icons/star-red.svg"
+          }
+          width={18}
+          height={18}
+          alt="star"
+          className='cursor-pointer'
+          onClick={handleSave}
+        />
+   </div>
   )
 }
 
