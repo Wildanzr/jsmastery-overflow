@@ -29,9 +29,9 @@ const TagDetailsPage = async ({ params, searchParams }: URLProps) => {
               key={question._id}
               _id={question._id}
               title={question.title}
-              tags={question.tags}
-              author={question.author}
-              upvotes={question.upvotes}
+              tags={[]}
+              author={question.author as any}
+              upvotes={[]}
               views={question.views}
               answers={question.answers}
               createdAt={question.createdAt}
