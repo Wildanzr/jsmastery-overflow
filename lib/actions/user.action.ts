@@ -12,7 +12,7 @@ import {
   UpdateUserParams,
 } from "./shared.types";
 import { revalidatePath } from "next/cache";
-import Question from "@/database/question.model";
+import Question, { IQuestion } from "@/database/question.model";
 import { FilterQuery } from "mongoose";
 import Tag from "@/database/tag.model";
 
@@ -100,9 +100,17 @@ export const saveQuestion = async (payload: ToggleSaveQuestionParams) => {
 
     const hasSaved = user.saved.includes(questionId);
     if (hasSaved) {
-      await User.findByIdAndUpdate(userId, { $pull: { saved: questionId } }, { new: true });
+      await User.findByIdAndUpdate(
+        userId,
+        { $pull: { saved: questionId } },
+        { new: true }
+      );
     } else {
-      await User.findByIdAndUpdate(userId, { $addToSet: { saved: questionId } }, { new: true });
+      await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { saved: questionId } },
+        { new: true }
+      );
     }
 
     revalidatePath(path);
@@ -110,35 +118,33 @@ export const saveQuestion = async (payload: ToggleSaveQuestionParams) => {
     console.error(error);
     throw error;
   }
-}
+};
 
 export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
   try {
     connectToDatabase();
 
     const { clerkId, filter, page = 1, pageSize = 10, searchQuery } = payload;
-    const query: FilterQuery<typeof Question> = searchQuery
-    ? { title: { $regex: new RegExp(searchQuery, "i") } }
-    : {};
+    const query: FilterQuery<IQuestion> = searchQuery
+      ? { title: { $regex: new RegExp(searchQuery, "i") } }
+      : {};
 
-    const user = await User.findOne({ clerkId })
-      .populate({
-        path: 'saved', 
-        options: { sort: { createdAt: -1 } },
-        match: query,
-        populate: [
-          { path: 'tags', model: Tag, select: 'name _id'},
-          { path: 'author', model: User, select: 'name _id picture'},
-        ]
-      })
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      options: { sort: { createdAt: -1 } },
+      match: query,
+      populate: [
+        { path: "tags", model: Tag, select: "name _id" },
+        { path: "author", model: User, select: "name _id picture" },
+      ],
+    });
 
     if (!user) throw new Error("User not found");
 
     const savedQuestions = user.saved;
-    return { questions: savedQuestions }
-
+    return { questions: savedQuestions };
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+};
