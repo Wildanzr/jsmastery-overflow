@@ -59,8 +59,8 @@ const Question = ({ mongoUserId, type, questionDetails }: QuestionProps) => {
           title: values.title,
           content: values.explanation,
           path: pathname,
-        })
-        router.push(`/question/${parsedQuestion._id}`)
+        });
+        router.push(`/question/${parsedQuestion._id}`);
       } else {
         await createQuestion({
           title: values.title,
@@ -223,8 +223,8 @@ const Question = ({ mongoUserId, type, questionDetails }: QuestionProps) => {
                       {field.value.map((tag, index) => (
                         <Badge
                           key={index}
-                          onClick={() => type === "Create" && 
-                            handleTagRemove(tag, field)
+                          onClick={() =>
+                            type === "Create" && handleTagRemove(tag, field)
                           }
                           className="subtle-medium background-light800_dark300 
                         text-light400_light500 flex items-center justify-center gap-2 rounded-md 
@@ -233,12 +233,12 @@ const Question = ({ mongoUserId, type, questionDetails }: QuestionProps) => {
                           {tag}
                           {type === "Create" && (
                             <Image
-                            src="/assets/icons/close.svg"
-                            alt="close"
-                            width={12}
-                            height={12}
-                            className="cursor-pointer object-contain invert-0 dark:invert"
-                          />
+                              src="/assets/icons/close.svg"
+                              alt="close"
+                              width={12}
+                              height={12}
+                              className="cursor-pointer object-contain invert-0 dark:invert"
+                            />
                           )}
                         </Badge>
                       ))}

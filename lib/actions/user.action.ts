@@ -156,7 +156,7 @@ export const getUserInfo = async (payload: GetUserByIdParams) => {
     connectToDatabase();
 
     const { userId } = payload;
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ clerkId: userId });
     if (!user) throw new Error("User not found");
 
     const totalQuestion = await Question.countDocuments({ author: user._id });
