@@ -37,7 +37,8 @@ const Question = ({ mongoUserId, type, questionDetails }: QuestionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const parsedQuestion: IQuestion = JSON.parse(questionDetails as string);
+  const parsedQuestion: IQuestion =
+    questionDetails && JSON.parse(questionDetails as string);
 
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
