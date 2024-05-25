@@ -14,8 +14,16 @@ import { FilterQuery } from "mongoose";
 export const getAllTags = async (payload: GetAllTagsParams) => {
   try {
     connectToDatabase();
+    const { searchQuery } = payload;
 
-    const tags = await Tag.find({});
+    const query: FilterQuery<typeof Tag> = {}
+
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: new RegExp(searchQuery, "i") } }
+      ]
+    }
+    const tags = await Tag.find(query);
 
     return { tags };
   } catch (error) {

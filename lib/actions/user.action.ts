@@ -83,8 +83,16 @@ export const getAllUsers = async (payload: GetAllUsersParams) => {
   try {
     connectToDatabase();
 
-    // const { filter, page = 1, pageSize = 20, searchQuery } = payload;
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const { searchQuery } = payload;
+    const query: FilterQuery<typeof User> = {}
+
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: new RegExp(searchQuery, "i") } },
+        { username: { $regex: new RegExp(searchQuery, "i") } },
+      ]
+    }
+    const users = await User.find(query).sort({ createdAt: -1 });
     return { users };
   } catch (error) {
     console.error(error);
@@ -127,9 +135,13 @@ export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
     connectToDatabase();
 
     const { clerkId, filter, page = 1, pageSize = 10, searchQuery } = payload;
-    const query: FilterQuery<IQuestion> = searchQuery
-      ? { title: { $regex: new RegExp(searchQuery, "i") } }
-      : {};
+    const query: FilterQuery<typeof Question> = {}
+
+      if (searchQuery) {
+        query.$or = [
+          { title: { $regex: new RegExp(searchQuery, "i") } }
+        ]
+      }
 
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",

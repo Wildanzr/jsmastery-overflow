@@ -20,7 +20,7 @@ const UserCard = async ({ user }: UserCardProps) => {
   return (
     <Link
       href={`/profile/${user.clerkId}`}
-      className="shadow-light100_darknone w-full max-xs:min-w-full
+      className="shadow-light100_darknone w-full max-xs:min-w-full 
     xs:w-[260px]"
     >
       <article className="background-light900_dark200 light-border flex w-full flex-col items-center justify-center rounded-2xl border p-8">
@@ -43,7 +43,7 @@ const UserCard = async ({ user }: UserCardProps) => {
 
         <div className="mt-5">
           {interactedTags.length > 0 ? (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {interactedTags.map((tag, idx) => (
                 <RenderTag key={idx} _id={tag._id} name={tag.name} />
               ))}
