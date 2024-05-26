@@ -83,16 +83,32 @@ export const getAllUsers = async (payload: GetAllUsersParams) => {
   try {
     connectToDatabase();
 
-    const { searchQuery } = payload;
-    const query: FilterQuery<typeof User> = {}
+    const { searchQuery, filter } = payload;
+    const query: FilterQuery<typeof User> = {};
 
     if (searchQuery) {
       query.$or = [
         { name: { $regex: new RegExp(searchQuery, "i") } },
         { username: { $regex: new RegExp(searchQuery, "i") } },
-      ]
+      ];
     }
-    const users = await User.find(query).sort({ createdAt: -1 });
+
+    let sortOptions = {};
+    switch (filter) {
+      case "new_users":
+        sortOptions = { joinedAt: -1 };
+        break;
+      case "old_users":
+        sortOptions = { joinedAt: 1 };
+        break;
+      case "top_contributors":
+        sortOptions = { reputation: -1 };
+        break;
+      default:
+        break;
+    }
+
+    const users = await User.find(query).sort(sortOptions);
     return { users };
   } catch (error) {
     console.error(error);
@@ -135,13 +151,11 @@ export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
     connectToDatabase();
 
     const { clerkId, filter, page = 1, pageSize = 10, searchQuery } = payload;
-    const query: FilterQuery<typeof Question> = {}
+    const query: FilterQuery<typeof Question> = {};
 
-      if (searchQuery) {
-        query.$or = [
-          { title: { $regex: new RegExp(searchQuery, "i") } }
-        ]
-      }
+    if (searchQuery) {
+      query.$or = [{ title: { $regex: new RegExp(searchQuery, "i") } }];
+    }
 
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
@@ -190,15 +204,15 @@ export const getUserQuestions = async (payload: GetUserStatsParams) => {
     const totalQuestions = await Question.countDocuments({ author: userId });
     const userQuestions = await Question.find({ author: userId })
       .sort({ views: -1, upvotes: -1 })
-      .populate('tags', '_id name')
-      .populate('author', '_id clerkId name picture')
+      .populate("tags", "_id name")
+      .populate("author", "_id clerkId name picture");
 
     return { totalQuestions, questions: userQuestions };
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+};
 
 export const getUserAnswers = async (payload: GetUserStatsParams) => {
   try {
@@ -209,12 +223,12 @@ export const getUserAnswers = async (payload: GetUserStatsParams) => {
     const totalAnswers = await Answer.countDocuments({ author: userId });
     const userAnswers = await Answer.find({ author: userId })
       .sort({ upvotes: -1 })
-      .populate('question', '_id title')
-      .populate('author', '_id clerkId name picture')
+      .populate("question", "_id title")
+      .populate("author", "_id clerkId name picture");
 
     return { totalAnswers, answers: userAnswers };
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+};
