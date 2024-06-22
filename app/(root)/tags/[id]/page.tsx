@@ -1,5 +1,6 @@
 import QuestionCard from "@/components/card/QuestionCard";
 import NoResult from "@/components/shared/NoResult";
+import Pagination from "@/components/shared/Pagination";
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar";
 import { IQuestion } from "@/database/question.model";
 import { getQuestionsByTagId } from "@/lib/actions/tag.action";
@@ -7,9 +8,9 @@ import { URLProps } from "@/types";
 import React from "react";
 
 const TagDetailsPage = async ({ params, searchParams }: URLProps) => {
-  const { questions, tagTitle } = await getQuestionsByTagId({
+  const { questions, tagTitle, isNext } = await getQuestionsByTagId({
     tagId: params.id,
-    page: 1,
+    page: searchParams.page ? +searchParams.page : 1,
     searchQuery: searchParams.q,
   });
   return (
@@ -45,10 +46,17 @@ const TagDetailsPage = async ({ params, searchParams }: URLProps) => {
           <NoResult
             title="There's no tags question to show"
             description="You can save tags by clicking the star icon on the question card."
-            link="/"
-            linkText="Go to Home"
+            link="/ask-question"
+            linkText="Ask a Question"
           />
         )}
+      </div>
+
+      <div className="mt-10">
+        <Pagination 
+          pageNumber={searchParams.page ? +searchParams.page : 1}
+          isNext={isNext}
+        />
       </div>
     </>
   );

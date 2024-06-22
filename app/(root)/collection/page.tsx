@@ -1,6 +1,7 @@
 import QuestionCard from "@/components/card/QuestionCard";
 import Filter from "@/components/shared/Filter";
 import NoResult from "@/components/shared/NoResult";
+import Pagination from "@/components/shared/Pagination";
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar";
 import { QuestionFilters } from "@/constants/filters";
 import { getSavedQuestions } from "@/lib/actions/user.action";
@@ -13,10 +14,11 @@ export default async function CollectionPage({
   const { userId } = auth();
   if (!userId) return null;
 
-  const { questions } = await getSavedQuestions({
+  const { questions, isNext } = await getSavedQuestions({
     clerkId: userId,
     searchQuery: searchParams.q,
     filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
   });
   return (
     <>
@@ -55,10 +57,17 @@ export default async function CollectionPage({
           <NoResult
             title="There's no saved question to show"
             description="You can save questions by clicking the star icon on the question card."
-            link="/"
-            linkText="Go to Home"
+            link="/ask-question"
+            linkText="Ask a question"
           />
         )}
+      </div>
+
+      <div className="mt-10">
+        <Pagination 
+          pageNumber={searchParams.page ? +searchParams.page : 1}
+          isNext={isNext}
+        />
       </div>
     </>
   );

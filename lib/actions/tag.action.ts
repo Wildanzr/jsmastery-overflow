@@ -14,7 +14,8 @@ import { FilterQuery } from "mongoose";
 export const getAllTags = async (payload: GetAllTagsParams) => {
   try {
     connectToDatabase();
-    const { searchQuery, filter } = payload;
+    const { searchQuery, filter, page = 1, pageSize = 10 } = payload;
+    const skipAmount = (page - 1) * pageSize;
 
     const query: FilterQuery<typeof Tag> = {}
 
@@ -42,10 +43,14 @@ export const getAllTags = async (payload: GetAllTagsParams) => {
         break
     }
 
+    const totalTags = await Tag.countDocuments(query)
     const tags = await Tag.find(query)
     .sort(sortOptions)
+    .skip(skipAmount)
+    .limit(pageSize)
+    const isNext = totalTags > skipAmount + tags.length
 
-    return { tags };
+    return { tags, isNext };
   } catch (error) {
     console.error(error);
     throw error;
@@ -89,6 +94,7 @@ export const getQuestionsByTagId = async (
     connectToDatabase();
 
     const { tagId, page = 1, pageSize = 10, searchQuery } = payload;
+    const skipAmount = (page - 1) * pageSize;
     const tagFilter: FilterQuery<ITag> = { _id: tagId };
 
     const tag = await Tag.findOne(tagFilter).populate({
@@ -99,6 +105,8 @@ export const getQuestionsByTagId = async (
         : {},
       options: {
         sort: { createdAt: -1 },
+        skip: skipAmount,
+        limit: pageSize + 1,
       },
       populate: [
         { path: "tags", model: Tag, select: "_id name" },
@@ -109,7 +117,9 @@ export const getQuestionsByTagId = async (
     if (!tag) throw new Error("Tag not found");
 
     const questions = tag.questions;
-    return { tagTitle: tag.name, questions };
+    const isNext = tag.questions.length > pageSize;
+
+    return { tagTitle: tag.name, questions, isNext };
   } catch (error) {
     console.error(error);
     throw error;

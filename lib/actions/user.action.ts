@@ -83,7 +83,8 @@ export const getAllUsers = async (payload: GetAllUsersParams) => {
   try {
     connectToDatabase();
 
-    const { searchQuery, filter } = payload;
+    const { searchQuery, filter, page = 1, pageSize = 10 } = payload;
+    const skipAmount = (page - 1) * pageSize;
     const query: FilterQuery<typeof User> = {};
 
     if (searchQuery) {
@@ -108,8 +109,15 @@ export const getAllUsers = async (payload: GetAllUsersParams) => {
         break;
     }
 
-    const users = await User.find(query).sort(sortOptions);
-    return { users };
+    const users = await User.find(query)
+    .skip(skipAmount)
+    .limit(pageSize)
+    .sort(sortOptions);
+
+    const totalUsers = await User.countDocuments(query);
+    const isNext = totalUsers > skipAmount + users.length;
+
+    return { users, isNext };
   } catch (error) {
     console.error(error);
     throw error;
@@ -150,7 +158,8 @@ export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
   try {
     connectToDatabase();
 
-    const { clerkId, filter, page = 1, pageSize = 10, searchQuery } = payload;
+    const { clerkId, filter, page = 1, pageSize = 20, searchQuery } = payload;
+    const skipAmount = (page - 1) * pageSize;
     const query: FilterQuery<typeof Question> = {};
 
     if (searchQuery) {
@@ -180,7 +189,7 @@ export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
 
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
-      options: { sort: sortOptions },
+      options: { sort: sortOptions, skip: skipAmount, limit: pageSize + 1},
       match: query,
       populate: [
         { path: "tags", model: Tag, select: "name _id" },
@@ -188,10 +197,12 @@ export const getSavedQuestions = async (payload: GetSavedQuestionsParams) => {
       ],
     });
 
+    const isNext = user.saved.length > pageSize;
+
     if (!user) throw new Error("User not found");
 
     const savedQuestions = user.saved;
-    return { questions: savedQuestions };
+    return { questions: savedQuestions, isNext };
   } catch (error) {
     console.error(error);
     throw error;
@@ -203,7 +214,7 @@ export const getUserInfo = async (payload: GetUserByIdParams) => {
     connectToDatabase();
 
     const { userId } = payload;
-    const user = await User.findOne({ clerkId: userId });
+    const user = await User.findOne({ _id: userId });
     if (!user) throw new Error("User not found");
 
     const totalQuestion = await Question.countDocuments({ author: user._id });
@@ -221,14 +232,19 @@ export const getUserQuestions = async (payload: GetUserStatsParams) => {
     connectToDatabase();
 
     const { userId, page = 1, pageSize = 10 } = payload;
+    const skipAmount = (page - 1) * pageSize;
 
     const totalQuestions = await Question.countDocuments({ author: userId });
     const userQuestions = await Question.find({ author: userId })
       .sort({ views: -1, upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
       .populate("tags", "_id name")
-      .populate("author", "_id clerkId name picture");
+      .populate("author", "_id clerkId name picture")
 
-    return { totalQuestions, questions: userQuestions };
+    const isNext = totalQuestions > skipAmount + userQuestions.length;
+
+    return { totalQuestions, questions: userQuestions, isNext };
   } catch (error) {
     console.error(error);
     throw error;
@@ -240,14 +256,19 @@ export const getUserAnswers = async (payload: GetUserStatsParams) => {
     connectToDatabase();
 
     const { userId, page = 1, pageSize = 10 } = payload;
+    const skipAmount = (page - 1) * pageSize;
 
     const totalAnswers = await Answer.countDocuments({ author: userId });
     const userAnswers = await Answer.find({ author: userId })
       .sort({ upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
       .populate("question", "_id title")
       .populate("author", "_id clerkId name picture");
 
-    return { totalAnswers, answers: userAnswers };
+    const isNext = totalAnswers > skipAmount + userAnswers.length;
+
+    return { totalAnswers, answers: userAnswers, isNext };
   } catch (error) {
     console.error(error);
     throw error;
